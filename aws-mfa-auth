@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+
+import sys
+import boto3
+import os
+import datetime
+
+#TOKEN_CODE = $1
+#MFA_SERIAL = 'arn:aws:iam::foo:mfa/bar@foo.com'
+#aws sts get-session-token --serial-number $MFA_SERIAL --token-code $TOKEN_CODE
+
+MFA_SERIAL = 'arn:aws:iam::foo:mfa/bar@foo.com'
+CREDENTIAL_NAME = 'dev-auto'
+
+
+def auth(mfa_token):
+
+    sts_client = boto3.client('sts')
+    response = sts_client.get_session_token(
+            SerialNumber=MFA_SERIAL,
+            TokenCode=mfa_token
+            )
+    cred = response['Credentials']
+    print(cred)
+
+    access_key_id = cred['AccessKeyId']
+    secret_access_key = cred['SecretAccessKey']
+    session_token = cred['SessionToken']
+    expiration = cred['Expiration']
+
+    print(f'{access_key_id}')
+    print(f'{secret_access_key}')
+    print(f'{session_token}')
+    print(expiration.isoformat())
+    os.system(f'aws configure set aws_access_key_id {access_key_id} --profile {CREDENTIAL_NAME}')
+    os.system(f'aws configure set aws_secret_access_key {secret_access_key} --profile {CREDENTIAL_NAME}')
+    os.system(f'aws configure set aws_session_token {session_token} --profile {CREDENTIAL_NAME}')
+
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("token", help="token digits from an MFA app")
+    args = parser.parse_args()
+    auth(args.token)
