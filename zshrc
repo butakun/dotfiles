@@ -1,4 +1,5 @@
 bindkey -v
+bindkey -M viins kj vi-cmd-mode
 
 alias ll='ls -l'
 alias la='ls -a'
