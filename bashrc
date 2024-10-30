@@ -1,4 +1,5 @@
 set -o vi
+bind -m vi-insert '"kj":vi-movement-mode'
 
 alias ll='ls -l'
 alias la='ls -a'
